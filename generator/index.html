@@ -118,6 +118,10 @@ http://opensource.org/licenses/MIT
 </div>
 
 <div id="wrap">
+<div style="display:block;">
+<table id="sprites-table" border="1" width="100%" height="100px"><tr></tr></table>
+</div>
+<!--
   <div id="left-pane">
     <p><b><span id="num-chosen-scripts">0</span> scripts selected</b>
     <p><a class="button" id="export">Get Code</a>
@@ -158,6 +162,8 @@ var current_id,
   scripts_by_id,
   chosen_scripts,
   lang;
+var hats = [];
+var scripts_per_hat = [];
 
 function asset_url (md5) {
   return "//cdn.scratch.mit.edu/internalapi/asset/" + md5 + "/get/";
@@ -206,6 +212,19 @@ function clear_project () {
   $("#export").attr("href", "");
 }
 
+function get_hat_from_script(aScript){
+	if (aScript.blocks[0].isHat) 
+	{
+		return(aScript.blocks[0].stringify())
+	}
+	else
+	{
+		/*ignore dead code*/
+		return(null);
+	}
+	
+}
+
 function load_project (project) {
   var sprites_list = [project] // stage
     .concat(project.children);
@@ -220,19 +239,64 @@ function load_project (project) {
   chosen_scripts = [];
   chosen_scripts_updated();
 
-  $.each(sprites_list, function (i, sprite) {
-    var name = sprite.objName;
-    $("#sprites-list").append(
-      $("<li>")
-        .text(name)
-        .attr("id", "sprite-"+i)
-        .click(function () {
-          show_sprite(i);
-        })
-    );
-
-    sprites[i] = sprite;
+  $.each(sprites_list, function (i, sprite){
+  	var doc = scratchblocks.fromJSON(sprite, scratchblocks.allLanguages[lang]);
+  	doc.scripts.forEach(function(script) {
+      var code = script.stringify();
+      if (get_hat_from_script(script)!=null)
+      {
+        if (hats.indexOf(get_hat_from_script(script)) == -1)
+      	{
+      		hats.push(get_hat_from_script(script));
+      	}
+      }
+    });  
   });
+  console.log(hats);
+  $.each(sprites_list, function (i, sprite){
+  	scripts_per_hat.push([]);
+  	hats.forEach(function(hat){
+  		scripts_per_hat[i].push("&nbsp;");
+  	});
+  	var doc = scratchblocks.fromJSON(sprite, scratchblocks.allLanguages[lang]);
+  	doc.scripts.forEach(function(script) {
+      var code = script.stringify();
+      if (get_hat_from_script(script)!=null)
+      {
+      	indexOfHat = hats.indexOf(get_hat_from_script(script));
+      	var scriptDoc = new scratchblocks.Document([script]);
+      	var $script_wrap = $("<div class=script-wrap>");
+      	scriptDoc.render(function(svg) {
+        	$script_wrap[0].style.height = scriptDoc.height + 'px';
+        	$script_wrap.append(svg);
+      	});
+      	scripts_per_hat[i][indexOfHat]=scripts_per_hat[i][indexOfHat].concat($script_wrap.html());
+      }
+  });
+  });
+  
+
+  //make grid
+  $.each(hats, function (i, hat) {
+    $("#sprites-table").append($("<tr>"));
+    //render hats[i]
+    var scriptDoc = scratchblocks.parse(hats[i],{
+    languages: lang ? ['en', lang] : ['en'],
+  });
+    var $script_wrap = $("<div class=script-wrap>");
+    scriptDoc.render(function(svg) {
+    	$script_wrap[0].style.height = scriptDoc.height + 'px';
+    	$script_wrap.append(svg);
+    });
+    
+
+    $("#sprites-table tr:last").append($("<td>").append($script_wrap.html()));
+    $.each(sprites_list,function(j, sprite)
+    {	var name = sprite.objName;
+    	$("#sprites-table tr:last").append($("<td>").append(scripts_per_hat[j][i]));
+    });
+  });
+    
 
 
   selected_sprite = 0;
@@ -248,9 +312,40 @@ function load_project (project) {
   show_sprite(selected_sprite);
   update_edit_link();
 
-
+  console.log(hats);
   check_hash();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function show_sprite (i) {
   if (!sprites || !i in sprites) {
@@ -483,12 +578,5 @@ $(document).ready(function () {
   check_hash();
 });
 </script>
-<script>
-  !function(g,s,q,r,d){r=g[r]=g[r]||function(){(r.q=r.q||[]).push(
-  arguments)};d=s.createElement(q);q=s.getElementsByTagName(q)[0];
-  d.src='//d1l6p2sc9645hc.cloudfront.net/tracker.js';q.parentNode.
-  insertBefore(d,q)}(window,document,'script','_gs');
 
-  _gs('GSN-349113-Y');
-</script>
 
