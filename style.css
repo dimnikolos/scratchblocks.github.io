@@ -1,9 +1,7 @@
 * {
   box-sizing: border-box;
 }
-html {
-  overflow-y: scroll;
-}
+
 body, div, p, textarea, pre {
   margin: 0;
   padding: 0;
@@ -335,12 +333,14 @@ button:active, button.pressed, .button:active, .button.pressed {
 
 /* Row */
 
-#header, #wrap, #sprites-list-wrap, #intro {
-  position: absolute;
-  overflow: hidden;
+#header, #wrap, #intro {
   left: 0;
   right: 0;
   padding: 1em;
+}
+
+#sprites-list-wrap {
+
 }
 
 #header {
