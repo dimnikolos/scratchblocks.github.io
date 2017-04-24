@@ -1,7 +1,9 @@
 * {
   box-sizing: border-box;
 }
-
+html {
+  overflow-y: scroll;
+}
 body, div, p, textarea, pre {
   margin: 0;
   padding: 0;
