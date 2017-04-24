@@ -119,7 +119,7 @@ http://opensource.org/licenses/MIT
 
 <div id="wrap">
 <div style="display:block;">
-<table id="sprites-table" border="1" width="100%" height="100px"><tr></tr></table>
+<table id="sprites-table" border="1" width="100%" height="100px" cellpadding="10px"><tr></tr></table>
 </div>
 <!--
   <div id="left-pane">
@@ -240,7 +240,9 @@ function load_project (project) {
   chosen_scripts_updated();
 
   $.each(sprites_list, function (i, sprite){
-  	var doc = scratchblocks.fromJSON(sprite, scratchblocks.allLanguages[lang]);
+    if ("scripts" in sprite)
+    {
+    var doc = scratchblocks.fromJSON(sprite, scratchblocks.allLanguages[lang]);
   	doc.scripts.forEach(function(script) {
       var code = script.stringify();
       if (get_hat_from_script(script)!=null)
@@ -250,7 +252,8 @@ function load_project (project) {
       		hats.push(get_hat_from_script(script));
       	}
       }
-    });  
+    });
+    } 
   });
   console.log(hats);
   $.each(sprites_list, function (i, sprite){
@@ -258,6 +261,8 @@ function load_project (project) {
   	hats.forEach(function(hat){
   		scripts_per_hat[i].push("&nbsp;");
   	});
+    if ("scripts" in sprite)
+    {
   	var doc = scratchblocks.fromJSON(sprite, scratchblocks.allLanguages[lang]);
   	doc.scripts.forEach(function(script) {
       var code = script.stringify();
@@ -273,9 +278,16 @@ function load_project (project) {
       	scripts_per_hat[i][indexOfHat]=scripts_per_hat[i][indexOfHat].concat($script_wrap.html());
       }
   });
+  }
   });
   
 
+  //make title
+  $("#sprites-table tr:last").append($("<td>").append("Event/Hat"));
+  $.each(sprites_list,function(i, sprite)
+    {
+      $("#sprites-table tr:last").append($("<td>").append(sprite["objName"]));
+    });
   //make grid
   $.each(hats, function (i, hat) {
     $("#sprites-table").append($("<tr>"));
